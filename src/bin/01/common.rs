@@ -4,11 +4,43 @@ pub enum Move {
     Left(i32),
 }
 
+impl Move {
+    pub fn dist(m: &Move) -> &i32 {
+        match m {
+            Move::Right(x) => x,
+            Move::Left(x) => x,
+        }
+    }
+}
+
 enum Direction {
     North,
     South,
     East,
     West,
+}
+
+pub struct Point {
+    pub x: i32,
+    pub y: i32,
+}
+
+pub struct PositionGetter {
+    x: i32,
+    y: i32,
+    moves: Box<dyn Iterator<Item = Move>>,
+    direction_index: usize,
+}
+
+impl PositionGetter {
+    pub fn from_moves<'a>(moves: Box<dyn Iterator<Item = Move>>) -> PositionGetter {
+        PositionGetter {
+            x: 0,
+            y: 0,
+            direction_index: 0,
+            moves,
+        }
+    }
 }
 
 pub fn parse(input: &str) -> Result<Vec<Move>, &'static str> {
@@ -28,32 +60,41 @@ pub fn parse(input: &str) -> Result<Vec<Move>, &'static str> {
         .collect()
 }
 
-pub fn moves_dist(moves: Vec<Move>) -> i32 {
-    let mut x = 0;
-    let mut y = 0;
-    let mut direction_index = 0;
-    let directions = [Direction::North, Direction::East, Direction::South, Direction::West];
+impl Iterator for PositionGetter {
+    type Item = Point;
 
-    for m in moves {
-        let dist = match m {
-            Move::Right(x) => x,
-            Move::Left(x) => x,
-        };
+    fn next(&mut self) -> Option<Self::Item> {
+        static DIRECTIONS: [Direction; 4] = [
+            Direction::North,
+            Direction::East,
+            Direction::South,
+            Direction::West,
+        ];
 
-        direction_index = match m {
-            Move::Right(_) => (direction_index + 1) % 4,
-            Move::Left(_) => (direction_index + 3) % 4,
-        };
+        match self.moves.next() {
+            None => None,
+            Some(m) => {
+                let dist = Move::dist(&m);
 
-        match directions[direction_index] {
-            Direction::North => y += dist,
-            Direction::South => y -= dist,
-            Direction::East => x += dist,
-            Direction::West => x -= dist,
-        };
-    };
+                self.direction_index = match m {
+                    Move::Right(_) => (self.direction_index + 1) % 4,
+                    Move::Left(_) => (self.direction_index + 3) % 4,
+                };
 
-    x.abs() + y.abs()
+                match DIRECTIONS[self.direction_index] {
+                    Direction::North => self.y += dist,
+                    Direction::South => self.y -= dist,
+                    Direction::East => self.x += dist,
+                    Direction::West => self.x -= dist,
+                };
+
+                Some(Point {
+                    x: self.x,
+                    y: self.y,
+                })
+            }
+        }
+    }
 }
 
 #[cfg(test)]

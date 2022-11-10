@@ -1,8 +1,8 @@
 mod common;
 
+use common::{Move, PositionGetter};
 use std::error::Error;
 use std::fs;
-use common::Move;
 
 fn main() -> Result<(), Box<dyn Error>> {
     let output = solve_for_input()?;
@@ -18,9 +18,13 @@ fn solve_for_input() -> Result<i32, Box<dyn Error>> {
 }
 
 fn solve(directions: Vec<Move>) -> i32 {
-    common::moves_dist(directions)
-}
+    let position_getter = PositionGetter::from_moves(Box::new(directions.into_iter()));
+    let final_point = position_getter
+        .last()
+        .expect("We should have something here");
 
+    final_point.x.abs() + final_point.y.abs()
+}
 
 #[cfg(test)]
 mod tests {
