@@ -5,10 +5,10 @@ pub enum Move {
 }
 
 impl Move {
-    pub fn dist(m: &Move) -> &i32 {
+    pub fn dist(m: &Move) -> i32 {
         match m {
-            Move::Right(x) => x,
-            Move::Left(x) => x,
+            Move::Right(x) => *x,
+            Move::Left(x) => *x,
         }
     }
 }
@@ -20,6 +20,7 @@ enum Direction {
     West,
 }
 
+#[derive(PartialEq, Eq, Hash, Debug)]
 pub struct Point {
     pub x: i32,
     pub y: i32,
@@ -30,15 +31,17 @@ pub struct PositionGetter {
     y: i32,
     moves: Box<dyn Iterator<Item = Move>>,
     direction_index: usize,
+    remaining_steps: i32,
 }
 
 impl PositionGetter {
     pub fn from_moves<'a>(moves: Box<dyn Iterator<Item = Move>>) -> PositionGetter {
         PositionGetter {
+            moves,
             x: 0,
             y: 0,
             direction_index: 0,
-            moves,
+            remaining_steps: 0,
         }
     }
 }
@@ -71,28 +74,34 @@ impl Iterator for PositionGetter {
             Direction::West,
         ];
 
-        match self.moves.next() {
-            None => None,
-            Some(m) => {
-                let dist = Move::dist(&m);
-
-                self.direction_index = match m {
-                    Move::Right(_) => (self.direction_index + 1) % 4,
-                    Move::Left(_) => (self.direction_index + 3) % 4,
-                };
-
-                match DIRECTIONS[self.direction_index] {
-                    Direction::North => self.y += dist,
-                    Direction::South => self.y -= dist,
-                    Direction::East => self.x += dist,
-                    Direction::West => self.x -= dist,
-                };
-
-                Some(Point {
-                    x: self.x,
-                    y: self.y,
-                })
+        if self.remaining_steps == 0 {
+            match self.moves.next() {
+                None => {}
+                Some(m) => {
+                    self.remaining_steps = Move::dist(&m);
+                    self.direction_index = match m {
+                        Move::Right(_) => (self.direction_index + 1) % 4,
+                        Move::Left(_) => (self.direction_index + 3) % 4,
+                    };
+                }
             }
+        }
+
+        if self.remaining_steps == 0 {
+            None
+        } else {
+            self.remaining_steps -= 1;
+            match DIRECTIONS[self.direction_index] {
+                Direction::North => self.y += 1,
+                Direction::South => self.y -= 1,
+                Direction::East => self.x += 1,
+                Direction::West => self.x -= 1,
+            };
+
+            Some(Point {
+                x: self.x,
+                y: self.y,
+            })
         }
     }
 }
