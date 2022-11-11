@@ -48,7 +48,6 @@ mod tests {
     }
 
     #[test]
-    #[ignore]
     fn case_my_input() {
         let output = solve_for_input().expect("wat");
         assert_eq!(output, 79);
