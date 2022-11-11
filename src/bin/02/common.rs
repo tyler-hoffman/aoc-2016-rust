@@ -40,11 +40,12 @@ impl KeyPad {
 
         for (y, line) in lines.enumerate() {
             for (x, ch) in line.chars().enumerate() {
-                if x % 2 == 0 {
+                if ch != ' ' {
                     let point = Point {
                         x: (x / 2) as i32,
                         y: y as i32,
                     };
+                    print!("{}, {}: {}\n", point.x, point.y, ch);
                     keys.insert(point, String::from(ch));
                 }
             }
@@ -60,6 +61,7 @@ pub fn parse(input: &str) -> Vec<&str> {
 
 pub fn solve(lines: Vec<&str>, keypad: KeyPad) -> String {
     let mut pos = keypad.char_point("5").expect("Pretty sure this exists");
+    print!("5: {}, {}\n", pos.x, pos.y);
     let mut output = String::new();
 
     for line in lines {

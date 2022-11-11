@@ -4,9 +4,11 @@ use common::KeyPad;
 use std::error::Error;
 use std::fs;
 
-const KEYPAD_LAYOUT: &str = "1 2 3
-4 5 6
-7 8 9";
+const KEYPAD_LAYOUT: &str = "    1
+  2 3 4
+5 6 7 8 9
+  A B C
+    D";
 
 fn main() -> Result<(), Box<dyn Error>> {
     let output = solve_for_input()?;
@@ -40,13 +42,13 @@ UUUUD";
         let directions = common::parse(input);
         let output = solve(directions);
 
-        assert_eq!(output, "1985");
+        assert_eq!(output, "5DB3");
     }
 
     #[test]
     fn case_my_input() {
         let output = solve_for_input().expect("this should work");
 
-        assert_eq!(output, "98575");
+        assert_eq!(output, "CD8D4");
     }
 }
