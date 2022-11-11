@@ -28,7 +28,7 @@ fn solve(directions: Vec<Move>) -> i32 {
             return pos.x.abs() + pos.y.abs();
         } else {
             visited.insert(pos);
-        }  
+        }
     }
     // we should never get here
     -1
@@ -44,7 +44,7 @@ mod tests {
         let directions = common::parse("R8, R4, R4, R8").expect("wat");
         let output = solve(directions);
 
-        assert_eq!(output, 4-1);
+        assert_eq!(output, 4);
     }
 
     #[test]
