@@ -57,3 +57,42 @@ impl KeyPad {
 pub fn parse(input: &str) -> Vec<&str> {
     input.lines().collect()
 }
+
+pub fn solve(lines: Vec<&str>, keypad: KeyPad) -> String {
+    let mut pos = keypad.char_point("5").expect("Pretty sure this exists");
+    let mut output = String::new();
+
+    for line in lines {
+        for ch in line.bytes() {
+            let next_pos = match ch {
+                b'U' => Point {
+                    x: pos.x,
+                    y: pos.y - 1,
+                },
+                b'D' => Point {
+                    x: pos.x,
+                    y: pos.y + 1,
+                },
+                b'L' => Point {
+                    x: pos.x - 1,
+                    y: pos.y,
+                },
+                b'R' => Point {
+                    x: pos.x + 1,
+                    y: pos.y,
+                },
+                _ => panic!("We can't get here"),
+            };
+
+            if keypad.has_point(&next_pos) {
+                pos = next_pos;
+            }
+        }
+        match keypad.key_at_point(&pos) {
+            Some(key) => output.push_str(key),
+            None => panic!("Woopsie"),
+        }
+    }
+
+    output
+}
