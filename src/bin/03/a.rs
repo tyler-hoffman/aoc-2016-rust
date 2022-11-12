@@ -13,14 +13,7 @@ fn solve_for_input() -> Result<usize, Box<dyn Error>> {
     let input = fs::read_to_string("src/bin/03/input.txt")?;
     let directions = parse(&input);
 
-    Ok(solve(directions))
-}
-
-fn solve(triangles: Vec<(u32, u32, u32)>) -> usize {
-    triangles
-        .iter()
-        .filter(|t| common::is_valid_triangle(*t))
-        .count()
+    Ok(common::solve(directions))
 }
 
 fn parse(input: &str) -> Vec<(u32, u32, u32)> {
