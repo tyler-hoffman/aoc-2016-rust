@@ -5,9 +5,12 @@ use std::collections::HashMap;
 #[derive(Debug, Hash, PartialEq)]
 pub struct Room {
     pub encrypted_name: String,
-    pub sector_id: i32,
+    pub sector_id: u32,
     pub checksum: String,
 }
+
+const FIRST_LETTER: u32 = 'a' as u32;
+const DASH: u32 = '-' as u32;
 
 impl Room {
     pub fn is_valid(self: &Self) -> bool {
@@ -25,6 +28,18 @@ impl Room {
             ordered_tuples[4]
         );
         self.checksum == expected
+    }
+
+    pub fn decrypted_name(self: &Self) -> String {
+        self.encrypted_name
+            .chars()
+            .map(|ch| ch as u32)
+            .map(|ch| match ch {
+                DASH => ' ' as u32,
+                x => ((x - FIRST_LETTER + self.sector_id) % 26) + FIRST_LETTER,
+            })
+            .map(|ch| ch as u8 as char)
+            .collect::<String>()
     }
 
     fn char_frequency(self: &Self) -> HashMap<char, u32> {
@@ -70,7 +85,7 @@ pub fn parse(input: &str) -> Vec<Room> {
         .map(|line| {
             let caps = re.captures(line).unwrap();
             let encrypted_name = String::from(&caps[1]);
-            let sector_id = caps[2].parse::<i32>().unwrap();
+            let sector_id = caps[2].parse::<u32>().unwrap();
             let checksum = String::from(&caps[3]);
 
             Room {
@@ -142,5 +157,17 @@ mod tests {
         };
 
         assert_eq!(room.is_valid(), false);
+    }
+
+    #[test]
+    fn test_decrypted_name() {
+        let room = Room {
+            encrypted_name: String::from("qzmt-zixmtkozy-ivhz"),
+            sector_id: 343,
+            checksum: String::from("ignore me"),
+        };
+        let output = room.decrypted_name();
+
+        assert_eq!(output, "very encrypted name");
     }
 }
